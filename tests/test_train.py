@@ -1,7 +1,9 @@
 import os
 import json
+import mlflow
 import numpy as np
 import pandas as pd
+import pytest
 from src.train import train
 
 
@@ -9,6 +11,13 @@ FEATURE_NAMES = [
     "age", "workclass", "education_num", "marital_status", "occupation",
     "relationship", "sex", "capital_gain", "capital_loss", "hours_per_week",
 ]
+
+
+@pytest.fixture(autouse=True)
+def _isolated_test_environment(tmp_path, monkeypatch):
+    """Tach MLflow artifacts va model/report cua moi test khoi workspace."""
+    mlflow.set_tracking_uri((tmp_path / "mlruns").as_uri())
+    monkeypatch.chdir(tmp_path)
 
 
 def _make_temp_data(tmp_path):

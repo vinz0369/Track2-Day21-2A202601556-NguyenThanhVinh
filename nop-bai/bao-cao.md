@@ -20,13 +20,13 @@
 
 **Bộ siêu tham số đã chọn:** `n_estimators=200`, `learning_rate=0.1`, `max_depth=5`.
 
-**Lý do:** Lần chạy 3 có F1 cao nhất là 0.7149 và vượt ngưỡng triển khai 0.65. Lần chạy 1 có accuracy cao nhất nhưng F1 thấp hơn, cho thấy accuracy không phản ánh đầy đủ khả năng nhận diện lớp thu nhập cao. Cấu hình 50 cây, learning rate 0.05 và độ sâu 2 học chưa đủ nên F1 chỉ đạt 0.6051. Khi learning rate nhỏ, mô hình thường cần nhiều cây hơn để bù lại mức đóng góp nhỏ của từng cây.
+**Lý do:** Lần 3 có F1 cao nhất (0.7149) và vượt ngưỡng 0.65. Lần 1 có accuracy cao hơn nhưng F1 thấp hơn, nên accuracy không phản ánh đầy đủ khả năng nhận diện lớp thu nhập cao.
 
 ---
 
 ## 2. Vì Sao Ngưỡng Chất Lượng Đặt Trên F1 Chứ Không Phải Accuracy
 
-Chỉ 24,8% dữ liệu thuộc lớp thu nhập trên 50K. Vì vậy, một mô hình luôn dự đoán “thu nhập thấp” vẫn đạt accuracy khoảng 75,2% nhưng F1 của lớp dương bằng 0 vì không phát hiện được người thu nhập cao nào. F1 kết hợp precision và recall, nên chỉ cao khi mô hình vừa hạn chế dự đoán dương sai, vừa tìm được phần lớn mẫu dương thật. Bài lab cần đánh giá trực tiếp lớp thu nhập cao nên dùng `f1_score(y_eval, preds)` với lớp dương mặc định. Không dùng weighted F1 vì lớp đa số sẽ chi phối kết quả; macro F1 cũng không phù hợp với quality gate này vì nó trung bình hóa hai lớp thay vì đo riêng lớp dương.
+Chỉ 24,8% dữ liệu thuộc lớp thu nhập trên 50K. Mô hình luôn đoán “thu nhập thấp” vẫn đạt accuracy khoảng 75,2% nhưng F1 lớp dương bằng 0. Vì vậy quality gate dùng `f1_score(y_eval, preds)` cho lớp thu nhập cao; F1 chỉ cao khi precision và recall cùng tốt.
 
 ---
 
@@ -36,7 +36,7 @@ Chỉ 24,8% dữ liệu thuộc lớp thu nhập trên 50K. Vì vậy, một mô
 |---|---|---|
 | MLflow không import được `pkg_resources` | Setuptools mới không còn module mà MLflow 2.13 sử dụng | Ghim `setuptools==80.9.0` trong requirements |
 | Bộ khung mặc định dùng GCP | Bài triển khai thực tế trên AWS | Đổi sang `dvc[s3]`, `boto3`, S3 và AWS credentials action |
-| Accuracy cao nhưng chưa chắc model tốt | Dữ liệu mất cân bằng 75/25 | So sánh theo F1 của lớp dương và dùng quality gate 0.65 |
+| Push không kích hoạt workflow trong fork | Actions của fork chưa được bật đầy đủ ở cấp repository | Tắt/bật lại Actions, sau đó push tự chạy đủ 4 jobs |
 
 ---
 
@@ -47,4 +47,4 @@ Chỉ 24,8% dữ liệu thuộc lớp thu nhập trên 50K. Vì vậy, một mô
 | Bước 2 (chỉ `train_batch1`) | 0.7149 | 0.8740 |
 | Bước 3 (thêm `train_batch2`) | 0.7354 | 0.8820 |
 
-**Nhận xét:** Sau khi tăng dữ liệu huấn luyện từ 22.361 lên 44.722 mẫu, F1 tăng 0.0205 và accuracy tăng 0.0080. Dữ liệu mới cùng phân phối nhưng cung cấp thêm ví dụ để mô hình nhận diện lớp dương tốt hơn; kết quả tăng trong lần chạy này không có nghĩa thêm dữ liệu luôn bảo đảm chỉ số tốt hơn.
+**Nhận xét:** Khi tăng từ 22.361 lên 44.722 mẫu, F1 tăng 0.0205 và accuracy tăng 0.0080. Dữ liệu mới cùng phân phối đã giúp lần chạy này nhận diện lớp dương tốt hơn, nhưng không có nghĩa thêm dữ liệu luôn bảo đảm chỉ số tăng.
